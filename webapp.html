@@ -1,0 +1,135 @@
+
+                    	100% Script finished in 0.18 seconds
+net2ftp
+wildcatguyana.netau.net
+Refresh (accesskey r) Logout (accesskey l)
+icon
+View file marker.html
+Back (accesskey b)   
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Simple Map</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css">
+    <style>
+     html,
+      body,
+      #map {
+         height: 100%;
+         width: 100%;
+         margin: 0;
+         padding: 0;
+      }
+      #search {
+         display: block;
+         position: absolute;
+         z-index: 2;
+         top: 20px;
+         left: 74px;
+      }
+  </style>
+    <script src="https://js.arcgis.com/3.15/"></script>
+    <script>
+      require([  "esri/dijit/Search","esri/symbols/SimpleMarkerSymbol",
+  "esri/Color", "esri/InfoTemplate","esri/graphic","esri/SpatialReference","esri/geometry/Point","esri/map","dojo/dom", "dojo/on", "dojo/dom-class", "dojo/_base/json", "esri/config", "esri/request", "dojo/domReady!"],
+      function(Search,SimpleMarkerSymbol, Color, InfoTemplate,Graphic,SpatialReference,Point,Map,dom, on, domClass, dojoJson, esriConfig, esriRequest) {
+         esriConfig.defaults.io.proxyUrl = "/proxy/";
+         var sr = new SpatialReference(4326);
+          var num;
+        var map = new Map("map", {
+          basemap: "dark-gray",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
+           center:[-96.7563135,32.9827138],// longitude, latitude
+          zoom: 13
+        });
+        var search = new Search({
+            map: map
+         }, "search");
+ 
+         search.startup();
+        var   KillCount=esriRequest({url:"http://wildcatguyana.netau.net/KillCount.php",handleAs:"json"});
+        KillCount.then(KCSuccess,KCFailure);
+ 
+ 
+        function KCSuccess(KCres){
+        var response=esriRequest({url:"http://wildcatguyana.netau.net/get_json2.php",handleAs:"json"});
+        response.then(Success,Failure);
+        num=parseInt(KCres);
+        function Success(res){
+ 
+          for (i = 0; i < num; i++) {
+ 
+        var pt=new Point(res.Killings[i].Long,res.Killings[i].Lat,sr);
+        var markerSymbol = new SimpleMarkerSymbol();
+        markerSymbol.setStyle(SimpleMarkerSymbol.STYLE_SQUARE);
+        markerSymbol.setSize(12);
+        markerSymbol.setColor(new Color([255,0,0]));
+        var pointAttributes = {ID:res.Killings[i].ID, Activity:res.Killings[i].Activity,Species:res.Killings[i].Species,Location:res.Killings[i].Location,Year:res.Killings[i].Year,KillingNo:res.Killings[i].KillingNo};
+        var pointInfoTemplate = new InfoTemplate("Wildcat Interaction");
+        //create point graphic using point and marker symbol
+        var pointGraphic = new Graphic(pt, markerSymbol, pointAttributes).setInfoTemplate(pointInfoTemplate);
+        //add graphics to maps graphics layer
+        map.graphics.add(pointGraphic);
+ 
+        }}
+          }
+ 
+        var count=esriRequest({url:"http://wildcatguyana.netau.net/count.php",handleAs:"json"});
+          count.then(CSuccess,CFailure);
+ 
+ 
+        function CSuccess(Cres){
+        var response=esriRequest({url:"http://wildcatguyana.netau.net/get_json.php",handleAs:"json"});
+          response.then(Success,Failure);
+        num=parseInt(Cres);
+        function Success(res){
+ 
+          for (i = 0; i < num; i++) {
+ 
+        var pt=new Point(res.details[i].Long,res.details[i].Lat,sr);
+        var markerSymbol = new SimpleMarkerSymbol();
+        markerSymbol.setStyle(SimpleMarkerSymbol.STYLE_SQUARE);
+        markerSymbol.setSize(12);
+        markerSymbol.setColor(new Color([255,0,0]));
+        var pointAttributes = {User_name:res.details[i].User_name, Sighting:res.details[i].Sighting,id:res.details[i].id};
+        var pointInfoTemplate = new InfoTemplate("Wildcat Interaction");
+        //create point graphic using point and marker symbol
+        var pointGraphic = new Graphic(pt, markerSymbol, pointAttributes).setInfoTemplate(pointInfoTemplate);
+        //add graphics to maps graphics layer
+        map.graphics.add(pointGraphic);
+ 
+        }}
+          }
+        function Failure(res){
+ 
+ 
+        }
+ 
+ 
+ 
+        function CFailure(res){
+ 
+ 
+        }
+        function KCFailure(res){
+ 
+ 
+        }
+ 
+ 
+ 
+        });
+    </script>
+  </head>
+ 
+  <body>
+    <div id="search"></div>
+    <div id="map"></div>
+ 
+ 
+  </body>
+</html>
+ 
+Syntax highlighting powered by GeSHi
